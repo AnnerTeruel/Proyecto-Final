@@ -552,7 +552,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_txtCantidadActionPerformed
 
     private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarSesionActionPerformed
-        // TODO add your handling code here:
+        this.dispose();
+        new Login().setVisible(true);
     }//GEN-LAST:event_btnCerrarSesionActionPerformed
 
     /**
