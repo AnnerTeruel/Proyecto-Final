@@ -4,6 +4,10 @@
  */
 package view;
 
+import dao.UsuarioDAO;
+import model.Usuario;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author anner
@@ -95,7 +99,23 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_txtNombreActionPerformed
 
     private void btnIngresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIngresarActionPerformed
-        // TODO add your handling code here:
+        String nombre = txtNombre.getText();
+        String password = new String(txtContrasena.getPassword());
+        
+        UsuarioDAO dao = new UsuarioDAO();
+        Usuario usuario = dao.validarLogin(nombre, password);
+        
+        if (usuario != null) {
+            String rol = usuario.getRol().toLowerCase();
+            if (rol.contains("admin")) {
+                new MenuPrincipal().setVisible(true);
+            } else {
+                new VentanaVentas().setVisible(true);
+            }
+            this.dispose(); // Ocultar Login
+        } else {
+            JOptionPane.showMessageDialog(this, "Credenciales incorrectas", "Error de Sesión", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnIngresarActionPerformed
 
     private void txtContrasenaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtContrasenaActionPerformed

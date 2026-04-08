@@ -4,6 +4,16 @@
  */
 package view;
 
+import dao.InventarioDAO;
+import dao.ProductoDAO;
+import dao.UsuarioDAO;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import model.Inventario;
+import model.Producto;
+import model.Usuario;
+
 /**
  *
  * @author anner
@@ -396,7 +406,19 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_txtPrecioActionPerformed
 
     private void btnBuscarIDoNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarIDoNombreActionPerformed
-        // TODO add your handling code here:
+        try {
+            int id = Integer.parseInt(txtBuscar.getText());
+            Inventario inv = new InventarioDAO().consultarStock(id);
+            DefaultTableModel model = (DefaultTableModel) tblInventario.getModel();
+            model.setRowCount(0);
+            if (inv != null) {
+                model.addRow(new Object[]{inv.getId(), inv.getProductoId(), inv.getCantidad(), inv.getFechaEntrada(), inv.getFechaSalida()});
+            } else {
+                JOptionPane.showMessageDialog(this, "No se encontró stock para es ID");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Ingrese un ID numérico válido para buscar");
+        }
     }//GEN-LAST:event_btnBuscarIDoNombreActionPerformed
 
     private void txtNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNombreActionPerformed
@@ -420,11 +442,33 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_txtContrasenaActionPerformed
 
     private void btnAniadirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAniadirActionPerformed
-        // TODO add your handling code here:
+        String nombre = txtNombre.getText();
+        String contra = txtContrasena.getText();
+        String rol = cmbRol.getSelectedItem().toString();
+        
+        Usuario u = new Usuario();
+        u.setNombre(nombre);
+        u.setPassword(contra);
+        u.setRol(rol);
+        
+        if (new UsuarioDAO().insertarUsuario(u)) {
+            JOptionPane.showMessageDialog(this, "Usuario añadido con éxito");
+            txtNombre.setText(""); 
+            txtContrasena.setText(""); 
+            txtDescripcion.setText(""); 
+            txtEdad.setText("");
+        } else {
+             JOptionPane.showMessageDialog(this, "Error añadiendo usuario");
+        }
     }//GEN-LAST:event_btnAniadirActionPerformed
 
     private void btnRecargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRecargarActionPerformed
-        // TODO add your handling code here:
+        DefaultTableModel model = (DefaultTableModel) tblUsuarios.getModel();
+        model.setRowCount(0);
+        List<Usuario> list = new UsuarioDAO().listarUsuarios();
+        for (Usuario u : list) {
+            model.addRow(new Object[]{u.getId(), u.getNombre(), "", u.getRol(), ""});
+        }
     }//GEN-LAST:event_btnRecargarActionPerformed
 
     private void txtNombreProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNombreProductoActionPerformed
@@ -432,11 +476,31 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_txtNombreProductoActionPerformed
 
     private void btnAniadirProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAniadirProductoActionPerformed
-        // TODO add your handling code here:
+        try {
+            Producto p = new Producto();
+            p.setNombre(txtNombreProducto.getText());
+            p.setPrecio(Double.parseDouble(txtPrecio.getText()));
+            p.setDescripcion("");
+            
+            if (new ProductoDAO().insertarProducto(p) > 0) {
+               JOptionPane.showMessageDialog(this, "Producto añadido con éxito");
+               txtNombreProducto.setText(""); 
+               txtPrecio.setText("");
+            } else {
+               JOptionPane.showMessageDialog(this, "Error añadiendo producto");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Precio inválido");
+        }
     }//GEN-LAST:event_btnAniadirProductoActionPerformed
 
     private void btnRecargarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRecargarProductoActionPerformed
-        // TODO add your handling code here:
+        DefaultTableModel model = (DefaultTableModel) tblProductos.getModel();
+        model.setRowCount(0);
+        List<Producto> list = new ProductoDAO().listarProductos();
+        for (Producto p : list) {
+            model.addRow(new Object[]{p.getId(), p.getNombre(), p.getPrecio()});
+        }
     }//GEN-LAST:event_btnRecargarProductoActionPerformed
 
     private void txtBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscarActionPerformed
@@ -444,7 +508,12 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_txtBuscarActionPerformed
 
     private void btnMostrarTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodoActionPerformed
-        // TODO add your handling code here:
+        DefaultTableModel model = (DefaultTableModel) tblInventario.getModel();
+        model.setRowCount(0);
+        List<Inventario> list = new InventarioDAO().mostrarTodo();
+        for (Inventario inv : list) {
+            model.addRow(new Object[]{inv.getId(), inv.getProductoId(), inv.getCantidad(), inv.getFechaEntrada(), inv.getFechaSalida()});
+        }
     }//GEN-LAST:event_btnMostrarTodoActionPerformed
 
     /**

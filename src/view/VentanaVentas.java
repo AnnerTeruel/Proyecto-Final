@@ -4,6 +4,12 @@
  */
 package view;
 
+import dao.ProductoDAO;
+import dao.VentaLogic;
+import model.Producto;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author anner
@@ -17,6 +23,9 @@ public class VentanaVentas extends javax.swing.JFrame {
      */
     public VentanaVentas() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        DefaultTableModel model = (DefaultTableModel) tblVentas.getModel();
+        model.setRowCount(0); // Limpiar filas vacías
     }
 
     /**
@@ -184,7 +193,7 @@ public class VentanaVentas extends javax.swing.JFrame {
                 {null, null, null, null, null}
             },
             new String [] {
-                "ID", "Producto", "Cantidad", "Precio Unitario", "Title 5"
+                "ID", "Producto", "Cantidad", "Precio Unitario", "Subtotal"
             }
         ));
         jScrollPane1.setViewportView(tblVentas);
@@ -253,19 +262,70 @@ public class VentanaVentas extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnIngresaraVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIngresaraVentaActionPerformed
-        // TODO add your handling code here:
+        try {
+            int productId = Integer.parseInt(txtBuscar.getText());
+            int cantidad = Integer.parseInt(txtCantidad.getText());
+
+            ProductoDAO pDao = new ProductoDAO();
+            Producto p = pDao.buscarPorId(productId);
+
+            if (p != null) {
+                DefaultTableModel model = (DefaultTableModel) tblVentas.getModel();
+                double subtotal = p.getPrecio() * cantidad;
+                model.addRow(new Object[]{p.getId(), p.getNombre(), cantidad, p.getPrecio(), subtotal});
+                
+                txtBuscar.setText("");
+                txtCantidad.setText("");
+                
+                // Actualizar Total
+                double total = 0;
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    total += Double.parseDouble(model.getValueAt(i, 4).toString());
+                }
+                txtTotal.setText(String.valueOf(total));
+            } else {
+                JOptionPane.showMessageDialog(this, "Producto no encontrado");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Debe ingresar ID y Cantidad válidos (numéricos)");
+        }
     }//GEN-LAST:event_btnIngresaraVentaActionPerformed
 
     private void btnAniadirACllienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAniadirACllienteActionPerformed
-        // TODO add your handling code here:
+        new RegistroCliente().setVisible(true);
     }//GEN-LAST:event_btnAniadirACllienteActionPerformed
 
     private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarSesionActionPerformed
-        // TODO add your handling code here:
+        this.dispose();
+        new Login().setVisible(true);
     }//GEN-LAST:event_btnCerrarSesionActionPerformed
 
     private void txtConfirmarPagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtConfirmarPagoActionPerformed
-        // TODO add your handling code here:
+        DefaultTableModel model = (DefaultTableModel) tblVentas.getModel();
+        int rows = model.getRowCount();
+        if (rows == 0) {
+            JOptionPane.showMessageDialog(this, "No hay productos en la venta");
+            return;
+        }
+
+        VentaLogic ventaLogic = new VentaLogic();
+        boolean exitoCompleto = true;
+
+        for (int i = 0; i < rows; i++) {
+            int idProd = Integer.parseInt(model.getValueAt(i, 0).toString());
+            int cant = Integer.parseInt(model.getValueAt(i, 2).toString());
+            
+            boolean exito = ventaLogic.realizarVenta(idProd, cant);
+            if (!exito) exitoCompleto = false;
+        }
+
+        if (exitoCompleto) {
+            JOptionPane.showMessageDialog(this, "Venta realizada y stock actualizado con éxito!");
+            model.setRowCount(0);
+            txtTotal.setText("0.0");
+        } else {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al procesar algunos productos de la venta.");
+        }
     }//GEN-LAST:event_txtConfirmarPagoActionPerformed
 
     private void txtTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTotalActionPerformed

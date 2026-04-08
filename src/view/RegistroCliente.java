@@ -4,6 +4,10 @@
  */
 package view;
 
+import dao.ClienteDAO;
+import model.Cliente;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author anner
@@ -142,11 +146,30 @@ public class RegistroCliente extends javax.swing.JFrame {
     }//GEN-LAST:event_txtNombreActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        // TODO add your handling code here:
+        try {
+            String identidad = txtIdentidad.getText();
+            String nombre = txtNombre.getText();
+            int edad = Integer.parseInt(txtEdad.getText());
+            
+            Cliente c = new Cliente();
+            c.setIdentidad(identidad);
+            c.setNombre(nombre);
+            c.setEdad(edad);
+            
+            ClienteDAO dao = new ClienteDAO();
+            if (dao.insertarCliente(c)) {
+                JOptionPane.showMessageDialog(this, "Cliente guardado exitosamente");
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al guardar cliente", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "La edad debe ser un número válido", "Error", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
-        // TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     /**
