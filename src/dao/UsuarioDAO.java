@@ -1,79 +1,114 @@
 package dao;
 
+import model.Usuario;
 import config.Conexion;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.Usuario;
 
 public class UsuarioDAO {
-    
-    public Usuario validarLogin(String nombre, String password) {
-        Usuario usuario = null;
-        String sql = "SELECT * FROM usuarios WHERE nombre = ? AND password = ?";
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        
-        try {
-            con = Conexion.getConnection();
-            if (con != null) {
-                ps = con.prepareStatement(sql);
-                ps.setString(1, nombre);
-                ps.setString(2, password);
-                rs = ps.executeQuery();
+
+    public Usuario login(String nombre, String password) {
+        String sql = "SELECT * FROM usuarios WHERE Nombre = ? AND Password = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nombre);
+            ps.setString(2, password);
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    usuario = new Usuario();
-                    usuario.setId(rs.getInt("id"));
-                    usuario.setNombre(rs.getString("nombre"));
-                    usuario.setPassword(rs.getString("password"));
-                    usuario.setRol(rs.getString("rol"));
+                    return extractUserFromResultSet(rs);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error en validarLogin: " + e.getMessage());
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (con != null) con.close();
-            } catch (SQLException e) {
-                System.err.println(e.getMessage());
-            }
+            e.printStackTrace();
         }
-        return usuario;
+        return null;
     }
 
-    public boolean insertarUsuario(Usuario u) {
-        String sql = "INSERT INTO usuarios (nombre, password, rol) VALUES (?, ?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, u.getNombre());
-            ps.setString(2, u.getPassword());
-            ps.setString(3, u.getRol());
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) { return false; }
-    }
-
-    public List<Usuario> listarUsuarios() {
-        List<Usuario> lista = new ArrayList<>();
+    public List<Usuario> getAll() {
+        List<Usuario> usuarios = new ArrayList<>();
         String sql = "SELECT * FROM usuarios";
         try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                Usuario u = new Usuario();
-                u.setId(rs.getInt("id"));
-                u.setNombre(rs.getString("nombre"));
-                u.setPassword(rs.getString("password"));
-                u.setRol(rs.getString("rol"));
-                lista.add(u);
+                usuarios.add(extractUserFromResultSet(rs));
             }
-        } catch (SQLException e) { }
-        return lista;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return usuarios;
+    }
+
+    public Usuario getById(int id) {
+        String sql = "SELECT * FROM usuarios WHERE ID = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return extractUserFromResultSet(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean insert(Usuario usuario) {
+        String sql = "INSERT INTO usuarios (Nombre, Edad, Rol, Descripcion_Rol, Password) VALUES (?, ?, ?, ?, ?)";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, usuario.getNombre());
+            ps.setInt(2, usuario.getEdad());
+            ps.setString(3, usuario.getRol());
+            ps.setString(4, usuario.getDescripcionRol());
+            ps.setString(5, usuario.getPassword());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean update(Usuario usuario) {
+        String sql = "UPDATE usuarios SET Nombre = ?, Edad = ?, Rol = ?, Descripcion_Rol = ?, Password = ? WHERE ID = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, usuario.getNombre());
+            ps.setInt(2, usuario.getEdad());
+            ps.setString(3, usuario.getRol());
+            ps.setString(4, usuario.getDescripcionRol());
+            ps.setString(5, usuario.getPassword());
+            ps.setInt(6, usuario.getId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean delete(int id) {
+        String sql = "DELETE FROM usuarios WHERE ID = ?";
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private Usuario extractUserFromResultSet(ResultSet rs) throws SQLException {
+        return new Usuario(
+            rs.getInt("ID"),
+            rs.getString("Nombre"),
+            rs.getInt("Edad"),
+            rs.getString("Rol"),
+            rs.getString("Descripcion_Rol"),
+            rs.getString("Password")
+        );
     }
 }

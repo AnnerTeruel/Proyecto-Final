@@ -151,19 +151,23 @@ public class RegistroCliente extends javax.swing.JFrame {
             String nombre = txtNombre.getText();
             int edad = Integer.parseInt(txtEdad.getText());
             
-            Cliente c = new Cliente();
-            c.setIdentidad(identidad);
-            c.setNombre(nombre);
-            c.setEdad(edad);
-            
+            try {
             ClienteDAO dao = new ClienteDAO();
-            if (dao.insertarCliente(c)) {
-                JOptionPane.showMessageDialog(this, "Cliente guardado exitosamente");
+            Cliente c = new Cliente();
+            c.setNombre(nombre);
+            c.setIdentidad(Integer.parseInt(identidad));
+            c.setEdad(Integer.parseInt(String.valueOf(edad)));
+            
+            if (dao.insert(c)) {
+                JOptionPane.showMessageDialog(this, "Cliente guardado con éxito", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 this.dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Error al guardar cliente", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error al guardar el cliente", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "La Identidad y la Edad deben ser numéricas.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+        }    }
+        catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "La edad debe ser un número válido", "Error", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnGuardarActionPerformed

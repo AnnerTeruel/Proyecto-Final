@@ -63,6 +63,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnRecargarProducto = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblProductos = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
+        txtCantidad = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         txtBuscar = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
@@ -70,6 +72,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         tblInventario = new javax.swing.JTable();
         btnBuscarIDoNombre = new javax.swing.JButton();
         btnMostrarTodo = new javax.swing.JButton();
+        btnCerrarSesion = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -249,6 +252,10 @@ public class MenuPrincipal extends javax.swing.JFrame {
         ));
         jScrollPane2.setViewportView(tblProductos);
 
+        jLabel1.setText("Cant Inicial");
+
+        txtCantidad.addActionListener(this::txtCantidadActionPerformed);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -257,10 +264,14 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 .addGap(263, 263, 263)
                 .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(btnAniadirProducto)
                 .addGap(18, 18, 18)
                 .addComponent(btnRecargarProducto)
-                .addContainerGap(457, Short.MAX_VALUE))
+                .addContainerGap(304, Short.MAX_VALUE))
             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel3Layout.createSequentialGroup()
                     .addGap(3, 3, 3)
@@ -281,7 +292,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnAniadirProducto)
-                    .addComponent(btnRecargarProducto))
+                    .addComponent(btnRecargarProducto)
+                    .addComponent(jLabel1)
+                    .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(565, Short.MAX_VALUE))
             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel3Layout.createSequentialGroup()
@@ -335,7 +348,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 {null, null, null, null, null}
             },
             new String [] {
-                "ID", "Nombre", "Edad", "Rol", "Desc. Rol"
+                "Id Inv", "Producto", "Cantidad", "Fecha Registro", "Fecha Salida"
             }
         ));
         jScrollPane3.setViewportView(tblInventario);
@@ -345,6 +358,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         btnMostrarTodo.setText("Mostrar Todo");
         btnMostrarTodo.addActionListener(this::btnMostrarTodoActionPerformed);
+
+        btnCerrarSesion.setText("Cerrar Sesion");
+        btnCerrarSesion.addActionListener(this::btnCerrarSesionActionPerformed);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -357,7 +373,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 .addComponent(btnBuscarIDoNombre)
                 .addGap(18, 18, 18)
                 .addComponent(btnMostrarTodo)
-                .addContainerGap(451, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(btnCerrarSesion)
+                .addContainerGap(333, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(3, 3, 3)
@@ -375,7 +393,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnBuscarIDoNombre)
                     .addComponent(btnMostrarTodo)
-                    .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCerrarSesion))
                 .addContainerGap(565, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
@@ -407,17 +426,19 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     private void btnBuscarIDoNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarIDoNombreActionPerformed
         try {
-            int id = Integer.parseInt(txtBuscar.getText());
-            Inventario inv = new InventarioDAO().consultarStock(id);
+            String searchTerm = txtBuscar.getText();
+            List<Inventario> lista = new InventarioDAO().searchByIdOrProductName(searchTerm);
             DefaultTableModel model = (DefaultTableModel) tblInventario.getModel();
             model.setRowCount(0);
-            if (inv != null) {
-                model.addRow(new Object[]{inv.getId(), inv.getProductoId(), inv.getCantidad(), inv.getFechaEntrada(), inv.getFechaSalida()});
+            if (lista != null && !lista.isEmpty()) {
+                for (Inventario inv : lista) {
+                    model.addRow(new Object[]{inv.getIdInventario(), inv.getNombreProducto(), inv.getCantidad(), inv.getFechaRegistro(), inv.getFechaSalida()});
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "No se encontró stock para es ID");
+                JOptionPane.showMessageDialog(this, "No se encontró stock para la búsqueda");
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Ingrese un ID numérico válido para buscar");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Debe ingresar un término válido para buscar");
         }
     }//GEN-LAST:event_btnBuscarIDoNombreActionPerformed
 
@@ -445,29 +466,37 @@ public class MenuPrincipal extends javax.swing.JFrame {
         String nombre = txtNombre.getText();
         String contra = txtContrasena.getText();
         String rol = cmbRol.getSelectedItem().toString();
+        String descripcion = txtDescripcion.getText();
         
-        Usuario u = new Usuario();
-        u.setNombre(nombre);
-        u.setPassword(contra);
-        u.setRol(rol);
-        
-        if (new UsuarioDAO().insertarUsuario(u)) {
-            JOptionPane.showMessageDialog(this, "Usuario añadido con éxito");
-            txtNombre.setText(""); 
-            txtContrasena.setText(""); 
-            txtDescripcion.setText(""); 
-            txtEdad.setText("");
-        } else {
-             JOptionPane.showMessageDialog(this, "Error añadiendo usuario");
+        try {
+            int edad = Integer.parseInt(txtEdad.getText());
+            Usuario u = new Usuario();
+            u.setNombre(nombre);
+            u.setPassword(contra);
+            u.setRol(rol);
+            u.setDescripcionRol(descripcion);
+            u.setEdad(edad);
+            
+            if (new UsuarioDAO().insert(u)) {
+                JOptionPane.showMessageDialog(this, "Usuario añadido con éxito");
+                txtNombre.setText(""); 
+                txtContrasena.setText(""); 
+                txtDescripcion.setText(""); 
+                txtEdad.setText("");
+            } else {
+                 JOptionPane.showMessageDialog(this, "Error añadiendo usuario");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "La edad debe ser numérica");
         }
     }//GEN-LAST:event_btnAniadirActionPerformed
 
     private void btnRecargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRecargarActionPerformed
         DefaultTableModel model = (DefaultTableModel) tblUsuarios.getModel();
         model.setRowCount(0);
-        List<Usuario> list = new UsuarioDAO().listarUsuarios();
+        List<Usuario> list = new UsuarioDAO().getAll();
         for (Usuario u : list) {
-            model.addRow(new Object[]{u.getId(), u.getNombre(), "", u.getRol(), ""});
+            model.addRow(new Object[]{u.getId(), u.getNombre(), u.getEdad(), u.getRol(), u.getDescripcionRol()});
         }
     }//GEN-LAST:event_btnRecargarActionPerformed
 
@@ -479,25 +508,27 @@ public class MenuPrincipal extends javax.swing.JFrame {
         try {
             Producto p = new Producto();
             p.setNombre(txtNombreProducto.getText());
-            p.setPrecio(Double.parseDouble(txtPrecio.getText()));
-            p.setDescripcion("");
+            p.setPrecio(Integer.parseInt(txtPrecio.getText()));
+            int cantidadInicial = Integer.parseInt(txtCantidad.getText());
             
-            if (new ProductoDAO().insertarProducto(p) > 0) {
+            if (new ProductoDAO().insert(p)) {
+               new InventarioDAO().insert(p.getId(), cantidadInicial);
                JOptionPane.showMessageDialog(this, "Producto añadido con éxito");
                txtNombreProducto.setText(""); 
                txtPrecio.setText("");
+               txtCantidad.setText("");
             } else {
                JOptionPane.showMessageDialog(this, "Error añadiendo producto");
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Precio inválido");
+            JOptionPane.showMessageDialog(this, "Precio y Cantidad Inicial deben ser válidos (numéricos)");
         }
     }//GEN-LAST:event_btnAniadirProductoActionPerformed
 
     private void btnRecargarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRecargarProductoActionPerformed
         DefaultTableModel model = (DefaultTableModel) tblProductos.getModel();
         model.setRowCount(0);
-        List<Producto> list = new ProductoDAO().listarProductos();
+        List<Producto> list = new ProductoDAO().getAll();
         for (Producto p : list) {
             model.addRow(new Object[]{p.getId(), p.getNombre(), p.getPrecio()});
         }
@@ -510,11 +541,19 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private void btnMostrarTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodoActionPerformed
         DefaultTableModel model = (DefaultTableModel) tblInventario.getModel();
         model.setRowCount(0);
-        List<Inventario> list = new InventarioDAO().mostrarTodo();
+        List<Inventario> list = new InventarioDAO().getAllWithProductInfo();
         for (Inventario inv : list) {
-            model.addRow(new Object[]{inv.getId(), inv.getProductoId(), inv.getCantidad(), inv.getFechaEntrada(), inv.getFechaSalida()});
+            model.addRow(new Object[]{inv.getIdInventario(), inv.getNombreProducto(), inv.getCantidad(), inv.getFechaRegistro(), inv.getFechaSalida()});
         }
     }//GEN-LAST:event_btnMostrarTodoActionPerformed
+
+    private void txtCantidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCantidadActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCantidadActionPerformed
+
+    private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarSesionActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCerrarSesionActionPerformed
 
     /**
      * @param args the command line arguments
@@ -545,10 +584,12 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton btnAniadir;
     private javax.swing.JButton btnAniadirProducto;
     private javax.swing.JButton btnBuscarIDoNombre;
+    private javax.swing.JButton btnCerrarSesion;
     private javax.swing.JButton btnMostrarTodo;
     private javax.swing.JButton btnRecargar;
     private javax.swing.JButton btnRecargarProducto;
     private javax.swing.JComboBox<String> cmbRol;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
@@ -568,6 +609,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
     private javax.swing.JTable tblProductos;
     private javax.swing.JTable tblUsuarios;
     private javax.swing.JTextField txtBuscar;
+    private javax.swing.JTextField txtCantidad;
     private javax.swing.JTextField txtContrasena;
     private javax.swing.JTextField txtDescripcion;
     private javax.swing.JTextField txtEdad;

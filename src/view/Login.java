@@ -103,7 +103,7 @@ public class Login extends javax.swing.JFrame {
         String password = new String(txtContrasena.getPassword());
         
         UsuarioDAO dao = new UsuarioDAO();
-        Usuario usuario = dao.validarLogin(nombre, password);
+        Usuario usuario = dao.login(nombre, password);
         
         if (usuario != null) {
             String rol = usuario.getRol().toLowerCase();

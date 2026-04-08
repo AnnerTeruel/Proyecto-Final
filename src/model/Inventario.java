@@ -3,52 +3,35 @@ package model;
 import java.sql.Timestamp;
 
 public class Inventario {
-    private int id;
-    private int productoId;
+    private int idInventario;
+    private int idProducto;
     private int cantidad;
-    private Timestamp fechaEntrada;
+    private Timestamp fechaRegistro;
     private Timestamp fechaSalida;
+    
+    private String nombreProducto;
 
-    public Inventario() {
-    }
+    public Inventario() {}
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getProductoId() {
-        return productoId;
-    }
-
-    public void setProductoId(int productoId) {
-        this.productoId = productoId;
-    }
-
-    public int getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(int cantidad) {
+    public Inventario(int idInventario, int idProducto, int cantidad, Timestamp fechaRegistro, Timestamp fechaSalida) {
+        this.idInventario = idInventario;
+        this.idProducto = idProducto;
         this.cantidad = cantidad;
-    }
-
-    public Timestamp getFechaEntrada() {
-        return fechaEntrada;
-    }
-
-    public void setFechaEntrada(Timestamp fechaEntrada) {
-        this.fechaEntrada = fechaEntrada;
-    }
-
-    public Timestamp getFechaSalida() {
-        return fechaSalida;
-    }
-
-    public void setFechaSalida(Timestamp fechaSalida) {
+        this.fechaRegistro = fechaRegistro;
         this.fechaSalida = fechaSalida;
     }
+
+    public int getIdInventario() { return idInventario; }
+    public void setIdInventario(int idInventario) { this.idInventario = idInventario; }
+    public int getIdProducto() { return idProducto; }
+    public void setIdProducto(int idProducto) { this.idProducto = idProducto; }
+    public int getCantidad() { return cantidad; }
+    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    public Timestamp getFechaRegistro() { return fechaRegistro; }
+    public void setFechaRegistro(Timestamp fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+    public Timestamp getFechaSalida() { return fechaSalida; }
+    public void setFechaSalida(Timestamp fechaSalida) { this.fechaSalida = fechaSalida; }
+    
+    public String getNombreProducto() { return nombreProducto; }
+    public void setNombreProducto(String nombreProducto) { this.nombreProducto = nombreProducto; }
 }

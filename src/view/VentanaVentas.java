@@ -267,7 +267,7 @@ public class VentanaVentas extends javax.swing.JFrame {
             int cantidad = Integer.parseInt(txtCantidad.getText());
 
             ProductoDAO pDao = new ProductoDAO();
-            Producto p = pDao.buscarPorId(productId);
+            Producto p = pDao.getById(productId);
 
             if (p != null) {
                 DefaultTableModel model = (DefaultTableModel) tblVentas.getModel();
@@ -308,14 +308,14 @@ public class VentanaVentas extends javax.swing.JFrame {
             return;
         }
 
-        VentaLogic ventaLogic = new VentaLogic();
+        dao.InventarioDAO invDao = new dao.InventarioDAO();
         boolean exitoCompleto = true;
 
         for (int i = 0; i < rows; i++) {
             int idProd = Integer.parseInt(model.getValueAt(i, 0).toString());
             int cant = Integer.parseInt(model.getValueAt(i, 2).toString());
             
-            boolean exito = ventaLogic.realizarVenta(idProd, cant);
+            boolean exito = invDao.updateStock(idProd, cant);
             if (!exito) exitoCompleto = false;
         }
 
