@@ -159,16 +159,16 @@ public class RegistroCliente extends javax.swing.JFrame {
             c.setEdad(Integer.parseInt(String.valueOf(edad)));
             
             if (dao.insert(c)) {
-                JOptionPane.showMessageDialog(this, "Cliente guardado con éxito", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Cliente guardado con exito", "Exito", JOptionPane.INFORMATION_MESSAGE);
                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Error al guardar el cliente", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "La Identidad y la Edad deben ser numéricas.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La Identidad y la Edad deben ser numericas.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
         }    }
         catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "La edad debe ser un número válido", "Error", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La edad debe ser un numero valido", "Error", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnGuardarActionPerformed
 

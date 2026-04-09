@@ -287,7 +287,7 @@ public class VentanaVentas extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Producto no encontrado");
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar ID y Cantidad válidos (numéricos)");
+            JOptionPane.showMessageDialog(this, "Debe ingresar ID y Cantidad validos (numericos)");
         }
     }//GEN-LAST:event_btnIngresaraVentaActionPerformed
 
@@ -320,11 +320,11 @@ public class VentanaVentas extends javax.swing.JFrame {
         }
 
         if (exitoCompleto) {
-            JOptionPane.showMessageDialog(this, "Venta realizada y stock actualizado con éxito!");
+            JOptionPane.showMessageDialog(this, "Venta realizada y stock actualizado con exito!");
             model.setRowCount(0);
             txtTotal.setText("0.0");
         } else {
-            JOptionPane.showMessageDialog(this, "Ocurrió un error al procesar algunos productos de la venta.");
+            JOptionPane.showMessageDialog(this, "Ocurrio un error al procesar algunos productos de la venta.");
         }
     }//GEN-LAST:event_txtConfirmarPagoActionPerformed
 

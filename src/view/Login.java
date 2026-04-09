@@ -114,7 +114,7 @@ public class Login extends javax.swing.JFrame {
             }
             this.dispose(); // Ocultar Login
         } else {
-            JOptionPane.showMessageDialog(this, "Credenciales incorrectas", "Error de Sesión", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Credenciales incorrectas", "Error de Sesion", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnIngresarActionPerformed
 
