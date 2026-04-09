@@ -572,11 +572,39 @@ public class MenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCerrarSesionActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = tblUsuarios.getSelectedRow();
+        if (selectedRow >= 0) {
+            int id = Integer.parseInt(tblUsuarios.getValueAt(selectedRow, 0).toString());
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Seguro que desea eliminar este usuario?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (new UsuarioDAO().delete(id)) {
+                    JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente");
+                    btnRecargarActionPerformed(evt); // Recargar tabla
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error al eliminar el usuario");
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione un usuario de la tabla para eliminar");
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void btnEliminarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarProductoActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = tblProductos.getSelectedRow();
+        if (selectedRow >= 0) {
+            int id = Integer.parseInt(tblProductos.getValueAt(selectedRow, 0).toString());
+            int confirm = JOptionPane.showConfirmDialog(this, "¿Seguro que desea eliminar este producto?", "Confirmar Eliminación", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (new ProductoDAO().delete(id)) {
+                    JOptionPane.showMessageDialog(this, "Producto eliminado correctamente");
+                    btnRecargarProductoActionPerformed(evt); // Recargar tabla
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error al eliminar. Verifique que no haya inventario asociado u otras dependencias.");
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione un producto de la tabla para eliminar");
+        }
     }//GEN-LAST:event_btnEliminarProductoActionPerformed
 
     /**
