@@ -84,8 +84,9 @@ public class Login extends javax.swing.JFrame {
         getContentPane().add(btnIngresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 200, 300, -1));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setMinimumSize(new java.awt.Dimension(99999, 9999));
         jPanel2.setPreferredSize(new java.awt.Dimension(400, 500));
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 450, 310));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 520, 310));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -112,7 +113,7 @@ public class Login extends javax.swing.JFrame {
             } else {
                 new VentanaVentas().setVisible(true);
             }
-            this.dispose(); // Ocultar Login
+            this.dispose(); 
         } else {
             JOptionPane.showMessageDialog(this, "Credenciales incorrectas", "Error de Sesion", JOptionPane.ERROR_MESSAGE);
         }

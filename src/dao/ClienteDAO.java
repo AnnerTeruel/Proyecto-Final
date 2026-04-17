@@ -10,8 +10,8 @@ public class ClienteDAO {
 
     public List<Cliente> getAll() {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT * FROM clientes";
-        try (Connection con = Conexion.getConnection();
+        String sql = "SELECT * FROM cliente";
+        try (Connection con = Conexion.connect();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -23,11 +23,28 @@ public class ClienteDAO {
         return clientes;
     }
 
-    public Cliente getByIdentidad(int identidad) {
-        String sql = "SELECT * FROM clientes WHERE Identidad = ?";
-        try (Connection con = Conexion.getConnection();
+    public List<Cliente> searchByName(String nombre) {
+        List<Cliente> clientes = new ArrayList<>();
+        String sql = "SELECT * FROM cliente WHERE nombre LIKE ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, identidad);
+            ps.setString(1, "%" + nombre + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    clientes.add(extractFromResultSet(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return clientes;
+    }
+
+    public Cliente getById(int id) {
+        String sql = "SELECT * FROM cliente WHERE id_cliente = ?";
+        try (Connection con = Conexion.connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return extractFromResultSet(rs);
@@ -40,12 +57,13 @@ public class ClienteDAO {
     }
 
     public boolean insert(Cliente cliente) {
-        String sql = "INSERT INTO clientes (Identidad, Nombre, Edad) VALUES (?, ?, ?)";
-        try (Connection con = Conexion.getConnection();
+        String sql = "INSERT INTO cliente (dni, nombre, telefono, correo) VALUES (?, ?, ?, ?)";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, cliente.getIdentidad());
+            ps.setString(1, cliente.getDni());
             ps.setString(2, cliente.getNombre());
-            ps.setInt(3, cliente.getEdad());
+            ps.setString(3, cliente.getTelefono());
+            ps.setString(4, cliente.getCorreo());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -53,11 +71,27 @@ public class ClienteDAO {
         }
     }
 
-    public boolean delete(int identidad) {
-        String sql = "DELETE FROM clientes WHERE Identidad = ?";
-        try (Connection con = Conexion.getConnection();
+    public boolean update(Cliente cliente) {
+        String sql = "UPDATE cliente SET dni = ?, nombre = ?, telefono = ?, correo = ? WHERE id_cliente = ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, identidad);
+            ps.setString(1, cliente.getDni());
+            ps.setString(2, cliente.getNombre());
+            ps.setString(3, cliente.getTelefono());
+            ps.setString(4, cliente.getCorreo());
+            ps.setInt(5, cliente.getIdCliente());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean delete(int id) {
+        String sql = "DELETE FROM cliente WHERE id_cliente = ?";
+        try (Connection con = Conexion.connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,9 +101,11 @@ public class ClienteDAO {
 
     private Cliente extractFromResultSet(ResultSet rs) throws SQLException {
         return new Cliente(
-            rs.getInt("Identidad"),
-            rs.getString("Nombre"),
-            rs.getInt("Edad")
+            rs.getInt("id_cliente"),
+            rs.getString("dni"),
+            rs.getString("nombre"),
+            rs.getString("telefono"),
+            rs.getString("correo")
         );
     }
 }

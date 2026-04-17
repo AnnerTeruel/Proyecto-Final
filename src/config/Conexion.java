@@ -3,20 +3,40 @@ package config;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import view.MenuPrincipal;
 
 public class Conexion {
-    private static final String URL = "jdbc:mysql://localhost:3306/tienda?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASSWORD = "Hola1234";
+    public static Connection connect()
+    {
+        Connection conn = null;
 
-    public static Connection getConnection() {
-        Connection con = null;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("Error de conexion: " + e.getMessage());
+        String server = "localhost";
+        String database = "tienda";
+        String user = "sa";
+        String password = "admin";
+
+        String url = "jdbc:sqlserver://" + server + ":1433;"
+                + "databaseName=" + database + ";"
+                + "encrypt=true;"
+                + "trustServerCertificate=true;"
+                + "loginTimeout=10;"; // A los 10 segundos se saldra y enviara error si no entra
+
+        try
+        {
+            conn = DriverManager.getConnection(url, user, password);
+            System.out.println("Conexion exitosa con sa");
         }
-        return con;
+        catch (SQLException e)
+        {
+            JOptionPane.showMessageDialog(null,"Error de conexion: " + e.getMessage());
+        }
+
+        return conn;
     }
+    
+    public static void main(String args[]){
+        Conexion.connect();
+    }
+    
 }

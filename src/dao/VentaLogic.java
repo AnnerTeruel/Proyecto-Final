@@ -13,7 +13,7 @@ public class VentaLogic {
         PreparedStatement ps = null;
         
         try {
-            con = Conexion.getConnection();
+            con = Conexion.connect();
             if (con != null) {
                 ps = con.prepareStatement(sql);
                 ps.setInt(1, cantidadVendida);

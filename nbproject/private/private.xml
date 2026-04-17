@@ -3,19 +3,20 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/UsuarioDAO.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/ClienteDAO.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/ProductoDAO.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/view/Login.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/view/RegistroCliente.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/view/VentanaVentas.java</file>
             <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/InventarioDAO.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/ClienteDAO.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/UsuarioDAO.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/model/Inventario.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/model/Producto.java</file>
             <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/model/Usuario.java</file>
             <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/model/Cliente.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/model/Producto.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/model/Inventario.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/main/Main.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/view/Login.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/VentaLogic.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/dao/ProductoDAO.java</file>
+            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/config/Conexion.java</file>
             <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/view/MenuPrincipal.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/view/VentanaVentas.java</file>
-            <file>file:/C:/Users/anner/Documents/NetBeansProjects/Tienda/src/view/RegistroCliente.java</file>
         </group>
     </open-files>
 </project-private>

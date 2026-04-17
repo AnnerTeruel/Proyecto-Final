@@ -9,8 +9,10 @@ import java.util.List;
 public class UsuarioDAO {
 
     public Usuario login(String nombre, String password) {
-        String sql = "SELECT * FROM usuarios WHERE Nombre = ? AND Password = ?";
-        try (Connection con = Conexion.getConnection();
+        String sql = "SELECT u.*, r.nombre_rol FROM usuario u " +
+                     "JOIN rol r ON u.roles_id_rol = r.id_rol " +
+                     "WHERE u.nombre = ? AND u.contrasenia = ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, nombre);
             ps.setString(2, password);
@@ -27,8 +29,9 @@ public class UsuarioDAO {
 
     public List<Usuario> getAll() {
         List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT * FROM usuarios";
-        try (Connection con = Conexion.getConnection();
+        String sql = "SELECT u.*, r.nombre_rol FROM usuario u " +
+                     "JOIN rol r ON u.roles_id_rol = r.id_rol";
+        try (Connection con = Conexion.connect();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -41,8 +44,10 @@ public class UsuarioDAO {
     }
 
     public Usuario getById(int id) {
-        String sql = "SELECT * FROM usuarios WHERE ID = ?";
-        try (Connection con = Conexion.getConnection();
+        String sql = "SELECT u.*, r.nombre_rol FROM usuario u " +
+                     "JOIN rol r ON u.roles_id_rol = r.id_rol " +
+                     "WHERE u.id_usuario = ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -57,14 +62,14 @@ public class UsuarioDAO {
     }
 
     public boolean insert(Usuario usuario) {
-        String sql = "INSERT INTO usuarios (Nombre, Edad, Rol, Descripcion_Rol, Password) VALUES (?, ?, ?, ?, ?)";
-        try (Connection con = Conexion.getConnection();
+        String sql = "INSERT INTO usuario (nombre, correo, contrasenia, roles_id_rol, estado_cuenta) VALUES (?, ?, ?, ?, ?)";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, usuario.getNombre());
-            ps.setInt(2, usuario.getEdad());
-            ps.setString(3, usuario.getRol());
-            ps.setString(4, usuario.getDescripcionRol());
-            ps.setString(5, usuario.getPassword());
+            ps.setString(2, usuario.getCorreo());
+            ps.setString(3, usuario.getContrasenia());
+            ps.setInt(4, usuario.getRolesIdRol());
+            ps.setString(5, usuario.getEstadoCuenta());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -73,15 +78,30 @@ public class UsuarioDAO {
     }
 
     public boolean update(Usuario usuario) {
-        String sql = "UPDATE usuarios SET Nombre = ?, Edad = ?, Rol = ?, Descripcion_Rol = ?, Password = ? WHERE ID = ?";
-        try (Connection con = Conexion.getConnection();
+        boolean tienePassword = usuario.getContrasenia() != null && !usuario.getContrasenia().trim().isEmpty();
+        String sql;
+        
+        if (tienePassword) {
+            sql = "UPDATE usuario SET nombre = ?, correo = ?, contrasenia = ?, roles_id_rol = ?, estado_cuenta = ? WHERE id_usuario = ?";
+        } else {
+            sql = "UPDATE usuario SET nombre = ?, correo = ?, roles_id_rol = ?, estado_cuenta = ? WHERE id_usuario = ?";
+        }
+
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, usuario.getNombre());
-            ps.setInt(2, usuario.getEdad());
-            ps.setString(3, usuario.getRol());
-            ps.setString(4, usuario.getDescripcionRol());
-            ps.setString(5, usuario.getPassword());
-            ps.setInt(6, usuario.getId());
+            ps.setString(2, usuario.getCorreo());
+            
+            if (tienePassword) {
+                ps.setString(3, usuario.getContrasenia());
+                ps.setInt(4, usuario.getRolesIdRol());
+                ps.setString(5, usuario.getEstadoCuenta());
+                ps.setInt(6, usuario.getIdUsuario());
+            } else {
+                ps.setInt(3, usuario.getRolesIdRol());
+                ps.setString(4, usuario.getEstadoCuenta());
+                ps.setInt(5, usuario.getIdUsuario());
+            }
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -90,8 +110,8 @@ public class UsuarioDAO {
     }
 
     public boolean delete(int id) {
-        String sql = "DELETE FROM usuarios WHERE ID = ?";
-        try (Connection con = Conexion.getConnection();
+        String sql = "DELETE FROM usuario WHERE id_usuario = ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
@@ -102,13 +122,15 @@ public class UsuarioDAO {
     }
 
     private Usuario extractUserFromResultSet(ResultSet rs) throws SQLException {
-        return new Usuario(
-            rs.getInt("ID"),
-            rs.getString("Nombre"),
-            rs.getInt("Edad"),
-            rs.getString("Rol"),
-            rs.getString("Descripcion_Rol"),
-            rs.getString("Password")
+        Usuario u = new Usuario(
+            rs.getInt("id_usuario"),
+            rs.getString("nombre"),
+            rs.getString("correo"),
+            rs.getString("contrasenia"),
+            rs.getInt("roles_id_rol"),
+            rs.getString("estado_cuenta")
         );
+        u.setNombreRol(rs.getString("nombre_rol"));
+        return u;
     }
 }

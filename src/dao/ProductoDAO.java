@@ -10,8 +10,12 @@ public class ProductoDAO {
 
     public List<Producto> getAll() {
         List<Producto> productos = new ArrayList<>();
-        String sql = "SELECT * FROM productos";
-        try (Connection con = Conexion.getConnection();
+        String sql = "SELECT p.*, pr.nombre_proveedor, b.nombre as nombre_bodega, c.nombre as nombre_categoria " +
+                     "FROM producto p " +
+                     "JOIN proveedor pr ON p.proveedores_id_proveedor = pr.id_proveedor " +
+                     "JOIN bodega b ON p.bodegas_id_bodega = b.id_bodega " +
+                     "JOIN categoria c ON p.categorias_id_categoria = c.id_categoria";
+        try (Connection con = Conexion.connect();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -23,51 +27,41 @@ public class ProductoDAO {
         return productos;
     }
 
-    public Producto getById(int id) {
-        String sql = "SELECT * FROM productos WHERE ID = ?";
-        try (Connection con = Conexion.getConnection();
+    public boolean insert(Producto p) {
+        String sql = "INSERT INTO producto (nombre, proveedores_id_proveedor, bodegas_id_bodega, fecha_creacion, " +
+                     "fecha_vencimiento, categorias_id_categoria, inventarios_id_inventario, precio) " +
+                     "VALUES (?, ?, ?, GETDATE(), ?, ?, ?, ?)";
+        
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return extractFromResultSet(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public boolean insert(Producto producto) {
-        String sql = "INSERT INTO productos (Nombre, Precio) VALUES (?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, producto.getNombre());
-            ps.setInt(2, producto.getPrecio());
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        producto.setId(generatedKeys.getInt(1));
-                    }
-                }
-                return true;
-            }
-            return false;
+            
+            ps.setString(1, p.getNombre());
+            ps.setInt(2, p.getProveedoresIdProveedor());
+            ps.setInt(3, p.getBodegasIdBodega());
+            ps.setTimestamp(4, new Timestamp(p.getFechaVencimiento().getTime()));
+            ps.setInt(5, p.getCategoriasIdCategoria());
+            ps.setInt(6, p.getInventariosIdInventario());
+            ps.setDouble(7, p.getPrecio());
+            
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public boolean update(Producto producto) {
-        String sql = "UPDATE productos SET Nombre = ?, Precio = ? WHERE ID = ?";
-        try (Connection con = Conexion.getConnection();
+    public boolean update(Producto p) {
+        String sql = "UPDATE producto SET nombre = ?, proveedores_id_proveedor = ?, bodegas_id_bodega = ?, " +
+                     "fecha_vencimiento = ?, categorias_id_categoria = ?, precio = ? WHERE id_producto = ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, producto.getNombre());
-            ps.setInt(2, producto.getPrecio());
-            ps.setInt(3, producto.getId());
+            ps.setString(1, p.getNombre());
+            ps.setInt(2, p.getProveedoresIdProveedor());
+            ps.setInt(3, p.getBodegasIdBodega());
+            ps.setTimestamp(4, new Timestamp(p.getFechaVencimiento().getTime()));
+            ps.setInt(5, p.getCategoriasIdCategoria());
+            ps.setDouble(6, p.getPrecio());
+            ps.setInt(7, p.getIdProducto());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,8 +70,8 @@ public class ProductoDAO {
     }
 
     public boolean delete(int id) {
-        String sql = "DELETE FROM productos WHERE ID = ?";
-        try (Connection con = Conexion.getConnection();
+        String sql = "DELETE FROM producto WHERE id_producto = ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
@@ -87,19 +81,16 @@ public class ProductoDAO {
         }
     }
 
-    private Producto extractFromResultSet(ResultSet rs) throws SQLException {
-        return new Producto(
-            rs.getInt("ID"),
-            rs.getString("Nombre"),
-            rs.getInt("Precio")
-        );
-    }
-    public Producto buscarPorIdONombre(String term) {
-        String sql = "SELECT * FROM productos WHERE CAST(ID AS CHAR) = ? OR Nombre LIKE ? LIMIT 1";
-        try (Connection con = Conexion.getConnection();
+    public Producto getById(int id) {
+        String sql = "SELECT p.*, pr.nombre_proveedor, b.nombre as nombre_bodega, c.nombre as nombre_categoria " +
+                     "FROM producto p " +
+                     "JOIN proveedor pr ON p.proveedores_id_proveedor = pr.id_proveedor " +
+                     "JOIN bodega b ON p.bodegas_id_bodega = b.id_bodega " +
+                     "JOIN categoria c ON p.categorias_id_categoria = c.id_categoria " +
+                     "WHERE p.id_producto = ?";
+        try (Connection con = Conexion.connect();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, term);
-            ps.setString(2, "%" + term + "%");
+            ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return extractFromResultSet(rs);
@@ -109,5 +100,25 @@ public class ProductoDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private Producto extractFromResultSet(ResultSet rs) throws SQLException {
+        Producto p = new Producto();
+        p.setIdProducto(rs.getInt("id_producto"));
+        p.setNombre(rs.getString("nombre"));
+        p.setProveedoresIdProveedor(rs.getInt("proveedores_id_proveedor"));
+        p.setBodegasIdBodega(rs.getInt("bodegas_id_bodega"));
+        p.setFechaCreacion(rs.getTimestamp("fecha_creacion"));
+        p.setFechaVencimiento(rs.getTimestamp("fecha_vencimiento"));
+        p.setCategoriasIdCategoria(rs.getInt("categorias_id_categoria"));
+        p.setInventariosIdInventario(rs.getInt("inventarios_id_inventario"));
+        p.setPrecio(rs.getDouble("precio"));
+        
+        // Nombres cargados vía JOIN
+        p.setNombreProveedor(rs.getString("nombre_proveedor"));
+        p.setNombreBodega(rs.getString("nombre_bodega"));
+        p.setNombreCategoria(rs.getString("nombre_categoria"));
+        
+        return p;
     }
 }

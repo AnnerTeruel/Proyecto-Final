@@ -1,37 +1,37 @@
 package model;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 public class Inventario {
     private int idInventario;
-    private int idProducto;
-    private int cantidad;
-    private Timestamp fechaRegistro;
-    private Timestamp fechaSalida;
+    private int stockActual;
+    private Date fechaRegistro;
+    private Date fechaSalida;
     
+    // Campo auxiliar para nombre de producto si fuera necesario (aunque el nuevo esquema invierte la relación)
     private String nombreProducto;
 
     public Inventario() {}
 
-    public Inventario(int idInventario, int idProducto, int cantidad, Timestamp fechaRegistro, Timestamp fechaSalida) {
+    public Inventario(int idInventario, int stockActual, Date fechaRegistro, Date fechaSalida) {
         this.idInventario = idInventario;
-        this.idProducto = idProducto;
-        this.cantidad = cantidad;
+        this.stockActual = stockActual;
         this.fechaRegistro = fechaRegistro;
         this.fechaSalida = fechaSalida;
     }
 
     public int getIdInventario() { return idInventario; }
     public void setIdInventario(int idInventario) { this.idInventario = idInventario; }
-    public int getIdProducto() { return idProducto; }
-    public void setIdProducto(int idProducto) { this.idProducto = idProducto; }
-    public int getCantidad() { return cantidad; }
-    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
-    public Timestamp getFechaRegistro() { return fechaRegistro; }
-    public void setFechaRegistro(Timestamp fechaRegistro) { this.fechaRegistro = fechaRegistro; }
-    public Timestamp getFechaSalida() { return fechaSalida; }
-    public void setFechaSalida(Timestamp fechaSalida) { this.fechaSalida = fechaSalida; }
-    
+    public int getStockActual() { return stockActual; }
+    public void setStockActual(int stockActual) { this.stockActual = stockActual; }
+    public Date getFechaRegistro() { return fechaRegistro; }
+    public void setFechaRegistro(Date fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+    public Date getFechaSalida() { return fechaSalida; }
+    public void setFechaSalida(Date fechaSalida) { this.fechaSalida = fechaSalida; }
+
     public String getNombreProducto() { return nombreProducto; }
     public void setNombreProducto(String nombreProducto) { this.nombreProducto = nombreProducto; }
+    
+    // Compatibilidad
+    public int getCantidad() { return stockActual; }
 }

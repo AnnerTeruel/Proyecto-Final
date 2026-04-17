@@ -8,11 +8,10 @@ import java.util.List;
 
 public class InventarioDAO {
 
-    public List<Inventario> getAllWithProductInfo() {
+    public List<Inventario> getAll() {
         List<Inventario> inventarios = new ArrayList<>();
-        String sql = "SELECT i.*, p.Nombre as NombreProducto FROM inventarios i " +
-                     "JOIN productos p ON i.id_producto = p.ID";
-        try (Connection con = Conexion.getConnection();
+        String sql = "SELECT * FROM inventario";
+        try (Connection con = Conexion.connect();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -24,19 +23,17 @@ public class InventarioDAO {
         return inventarios;
     }
 
-    public List<Inventario> searchByIdOrProductName(String searchTerm) {
+    public List<Inventario> getAllWithProductInfo() {
         List<Inventario> inventarios = new ArrayList<>();
-        String sql = "SELECT i.*, p.Nombre as NombreProducto FROM inventarios i " +
-                     "JOIN productos p ON i.id_producto = p.ID " +
-                     "WHERE CAST(i.id_inventario AS CHAR) = ? OR p.Nombre LIKE ?";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, searchTerm);
-            ps.setString(2, "%" + searchTerm + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    inventarios.add(extractFromResultSet(rs));
-                }
+        // En el nuevo esquema, PRODUCTO apunta a INVENTARIO. 
+        // Para obtener info de producto, debemos hacer el JOIN al revés.
+        String sql = "SELECT i.*, p.nombre as NombreProducto FROM inventario i " +
+                     "LEFT JOIN producto p ON p.inventarios_id_inventario = i.id_inventario";
+        try (Connection con = Conexion.connect();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                inventarios.add(extractFromResultSet(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -44,36 +41,58 @@ public class InventarioDAO {
         return inventarios;
     }
 
-    public boolean updateStock(int idProducto, int quantityToReduce) {
-        String sqlSelect = "SELECT * FROM inventarios WHERE id_producto = ?";
-        String sqlUpdate = "UPDATE inventarios SET Cantidad = ?, Fecha_Salida = ? WHERE id_inventario = ?";
+    public boolean update(int idInventario, int cantidad) {
+        String sql = "UPDATE inventario SET stock_actual = ? WHERE id_inventario = ?";
+        try (Connection con = Conexion.connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idInventario);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-        try (Connection con = Conexion.getConnection()) {
-            con.setAutoCommit(false); 
-            
-            try (PreparedStatement psSelect = con.prepareStatement(sqlSelect)) {
-                psSelect.setInt(1, idProducto);
-                ResultSet rs = psSelect.executeQuery();
-                if (rs.next()) {
-                    int idInventario = rs.getInt("id_inventario");
-                    int stockActual = rs.getInt("Cantidad");
-                    
-                    if (stockActual >= quantityToReduce) {
-                        try (PreparedStatement psUpdate = con.prepareStatement(sqlUpdate)) {
-                            psUpdate.setInt(1, stockActual - quantityToReduce);
-                            psUpdate.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
-                            psUpdate.setInt(3, idInventario);
-                            psUpdate.executeUpdate();
-                        }
-                        con.commit();
-                        return true;
+    public int insert(int cantidad) {
+        String sql = "INSERT INTO inventario (stock_actual, fecha_registro, fecha_salida) VALUES (?, GETDATE(), GETDATE())";
+        try (Connection con = Conexion.connect();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, cantidad);
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
                     }
                 }
-            } catch (SQLException e) {
-                con.rollback();
-                e.printStackTrace();
-            } finally {
-                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public boolean updateStock(int idProducto, int cantidadADescontar) {
+        // Primero buscamos el id_inventario asociado a ese producto
+        String sqlSearch = "SELECT inventarios_id_inventario FROM producto WHERE id_producto = ?";
+        String sqlUpdate = "UPDATE inventario SET stock_actual = stock_actual - ? WHERE id_inventario = ?";
+        
+        try (Connection con = Conexion.connect()) {
+            int idInv = -1;
+            try (PreparedStatement ps1 = con.prepareStatement(sqlSearch)) {
+                ps1.setInt(1, idProducto);
+                try (ResultSet rs = ps1.executeQuery()) {
+                    if (rs.next()) idInv = rs.getInt(1);
+                }
+            }
+            
+            if (idInv != -1) {
+                try (PreparedStatement ps2 = con.prepareStatement(sqlUpdate)) {
+                    ps2.setInt(1, cantidadADescontar);
+                    ps2.setInt(2, idInv);
+                    return ps2.executeUpdate() > 0;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,25 +103,16 @@ public class InventarioDAO {
     private Inventario extractFromResultSet(ResultSet rs) throws SQLException {
         Inventario i = new Inventario(
             rs.getInt("id_inventario"),
-            rs.getInt("id_producto"),
-            rs.getInt("Cantidad"),
-            rs.getTimestamp("Fecha_Registro"),
-            rs.getTimestamp("Fecha_Salida")
+            rs.getInt("stock_actual"),
+            rs.getTimestamp("fecha_registro"),
+            rs.getTimestamp("fecha_salida")
         );
-        i.setNombreProducto(rs.getString("NombreProducto"));
-        return i;
-    }
-    
-    public boolean insert(int idProducto, int cantidad) {
-        String sql = "INSERT INTO inventarios (id_producto, Cantidad) VALUES (?, ?)";
-        try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, idProducto);
-            ps.setInt(2, cantidad);
-            return ps.executeUpdate() > 0;
+        try {
+            // Intentar leer el nombre si el JOIN lo trajo
+            i.setNombreProducto(rs.getString("NombreProducto"));
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            // No se trajo el nombre en esta consulta
         }
+        return i;
     }
 }
